@@ -3,7 +3,9 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const _env = {
-  port: process.env.PORT,
+  nodeEnv: String(process.env.NODE_ENV),
+  
+  port: String(process.env.PORT),
   corsOrigin: String(process.env.CORS_ORIGIN),
 
   mongodbUrl: String(process.env.MONGODB_URL),
