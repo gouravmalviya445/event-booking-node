@@ -1,11 +1,13 @@
 import express from "express";
 import { apiLogHandler } from "./middlewares/globalMiddleware";
 import { errorHandler } from "./middlewares/globalMiddleware";
+import cookieParser from "cookie-parser";
 const app = express();
 
 // global middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser())
 
 // logger
 app.use(apiLogHandler);
