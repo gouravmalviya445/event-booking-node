@@ -12,7 +12,7 @@ const _env = {
   dbName: String(process.env.DB_NAME),
 
   jwtSecret: String(process.env.JWT_SECRET),
-  jwtExpiry: String(process.env.JWT_EXPIRES_IN)
+  jwtExpiry: String(process.env.JWT_EXPIRY),
 }
 
 export const ENV = Object.freeze(_env);

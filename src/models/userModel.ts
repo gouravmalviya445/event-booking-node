@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Document, Schema } from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { ENV } from "../env";
@@ -10,6 +10,8 @@ interface IUser {
   role: "user" | "admin";
 
   comparePassword(password: string): Promise<boolean>;
+  createAccessToken(): string;
+  toJSON(): IUser;
 }
 
 const userSchema: Schema<IUser> = new Schema<IUser>(
@@ -59,6 +61,12 @@ userSchema.methods.createAccessToken = function () {
     ENV.jwtSecret,
     { expiresIn: ENV.jwtExpiry } as jwt.SignOptions
   )
+}
+
+userSchema.methods.toJSON = function () {
+  const user = (this as mongoose.Document).toObject();
+  user.password = undefined;
+  return user;
 }
 
 const User = mongoose.model<IUser>("User", userSchema);
