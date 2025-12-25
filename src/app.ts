@@ -16,6 +16,9 @@ app.get("/api/health", (_, res) => {
 })
 
 // routes
+import userRouter from "./routes/userRouter";
+
+app.use("/api/users", userRouter);
 
 // global error handler
 app.use(errorHandler);
