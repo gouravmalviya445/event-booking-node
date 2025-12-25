@@ -7,6 +7,12 @@ const userRegisterSchema = z.object({
   role: z.enum(["user", "admin", "organizer"]).default("user")
 })
 
+const userLoginSchema = z.object({
+  email: z.email(),
+  password: z.string().min(6)
+})
+
 export {
-  userRegisterSchema
+  userRegisterSchema,
+  userLoginSchema
 }
