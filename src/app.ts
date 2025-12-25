@@ -1,5 +1,6 @@
 import express from "express";
 import { apiLogHandler } from "./middlewares/globalMiddleware";
+import { errorHandler } from "./middlewares/globalMiddleware";
 const app = express();
 
 // global middleware
@@ -13,5 +14,10 @@ app.use(apiLogHandler);
 app.get("/api/health", (_, res) => {
   res.status(200).send("OK");
 })
+
+// routes
+
+// global error handler
+app.use(errorHandler);
 
 export { app };

@@ -1,17 +1,72 @@
 import { NextFunction, Request, Response } from "express";
 import { logger } from "../lib/logger";
+import { ApiError, StatusCodes } from "../utils/ApiError";
 
 
 const apiLogHandler = (req: Request, res: Response, next: NextFunction) => {
   const startTime = Date.now();
   res.on("finish", () => {
-    const duration = Date.now() - startTime;
-    logger
-      .info(`method=${req.method} path=${req.path} status=${res.statusCode} latency=${duration}ms`);
+    if (res.statusCode < 400) {
+      logger
+        .info({
+          method: req.method,
+          path: req.path,
+          params: req.params,
+          statusCode: res.statusCode,
+          latency: Date.now() - startTime,
+        }, "info")
+    } else {
+      logger.warn("error detected please check above logs!")
+    }
   })
   next();
 }
 
+const errorHandler = (
+  err: ApiError | Error, 
+  req: Request, 
+  res: Response, 
+  next: NextFunction
+) => {
+  let error = err;
+  
+  // If it's not already an ApiError, wrap it
+  if (!(err instanceof ApiError)) {
+    error = new ApiError(
+      (err as any)?.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
+      err.message,
+      (err as ApiError).errors || [],
+      err.stack
+    );
+  }
+  
+  const apiError = error as ApiError;
+  
+  // response
+  const response = {
+    statusCode: apiError.statusCode,
+    success: apiError.success,
+    message: apiError.message,
+    errors: apiError.errors,
+    data: apiError.data,
+    ...(process.env.NODE_ENV !== 'production' && { stack: apiError.stack })
+  };
+  
+  // Log error
+  logger.error({
+    method: req.method,
+    path: req.path,
+    statusCode: apiError.statusCode,
+    message: apiError.message,
+    params: req.params,
+    errors: apiError.errors,
+    stack: apiError.stack
+  });
+  
+  res.status(apiError.statusCode).json(response);
+};
+
 export {
-  apiLogHandler
+  apiLogHandler,
+  errorHandler
 }

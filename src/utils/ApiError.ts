@@ -1,11 +1,12 @@
 import { ENV } from "../env";
+import { StatusCodes } from "http-status-codes";
 
 class ApiError extends Error {
   statusCode: number;
   success: boolean;
   errors: string[];
-  stack: string;
-  data: any;
+  data: null;
+  
   constructor(
     statusCode: number,
     message: string = "Something went wrong",
@@ -13,21 +14,28 @@ class ApiError extends Error {
     stack: string = ""
   ) {
     super(message);
+    
+    // Set the prototype explicitly for instanceof checks
+    Object.setPrototypeOf(this, ApiError.prototype);
+    
     this.statusCode = statusCode;
     this.data = null;
     this.errors = errors;
-    this.message = message;
     this.success = false;
-    this.stack = "";
-
-    if (ENV.nodeEnv != "production") {
-      if (stack) {
-        this.stack = stack;
-      } else {
-        Error.captureStackTrace(this, this.constructor)
-      }
+    
+    // Handle stack trace properly
+    if (stack) {
+      this.stack = stack;
+    } else if (ENV.nodeEnv !== "production") {
+      // Only capture stack trace in non-production
+      Error.captureStackTrace(this, this.constructor);
+    } else {
+      // In production, keep minimal stack
+      this.stack = "";
     }
   }
 }
-
-export { ApiError }
+export {
+  ApiError,
+  StatusCodes
+ }
