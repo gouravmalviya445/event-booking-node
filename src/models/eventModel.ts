@@ -2,13 +2,14 @@ import mongoose, { Schema } from "mongoose";
 
 interface IEvent {
   title: string;
-  description: string;
+  description?: string;
   location: string;
   date: Date;
   price: number;
   totalSeats: number;
   availableSeats: number;
   status: "active" | "cancelled";
+  category: string;
   // startTime: string;
   // endTime: string;
 }
@@ -35,6 +36,12 @@ const eventSchema: Schema<IEvent> = new Schema(
     // TODO:
     // startTime: String,
     // endTime: String,
+
+    category: {
+      type: String,
+      enum: ["sport", "business", "tech", "music", "art", "health"],
+      required: true
+    },
 
     price: {
       type: Number,
