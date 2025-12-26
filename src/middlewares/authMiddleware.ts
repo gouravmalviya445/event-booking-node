@@ -42,7 +42,7 @@ const userAuth = asyncHandler(
   }
 )
 
-const eventAuth = asyncHandler(
+const adminAuth = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     if (req.user?.role !== "admin") {
       throw new ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized", [], "");
@@ -52,7 +52,18 @@ const eventAuth = asyncHandler(
   }
 )
 
+const organizerAuth = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (req.user?.role !== "organizer") {
+      throw new ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized", [], "");
+    } else {
+      next();
+    }
+  }
+)
+
 export {
   userAuth,
-  eventAuth
+  adminAuth,
+  organizerAuth
 }

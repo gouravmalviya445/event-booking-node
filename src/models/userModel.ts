@@ -7,7 +7,7 @@ export interface IUser {
   name: string;
   email: string;
   password: string;
-  role: "user" | "admin";
+  role: "user" | "admin" | "organizer";
 
   comparePassword(password: string): Promise<boolean>;
   createAccessToken(): string;
