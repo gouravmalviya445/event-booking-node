@@ -19,8 +19,10 @@ app.get("/api/health", (_, res) => {
 
 // routes
 import userRouter from "./routes/userRouter";
+import eventRouter from "./routes/eventRouter"
 
 app.use("/api/users", userRouter);
+app.use("/api/events", eventRouter);
 
 // global error handler
 app.use(errorHandler);
