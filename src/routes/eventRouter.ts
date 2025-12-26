@@ -1,9 +1,11 @@
 import { Router } from "express";
 import { eventAuth, userAuth } from "../middlewares/authMiddleware";
-import { createEvent } from "../controllers/eventController";
+import { createEvent, listEvent } from "../controllers/eventController";
 
 const router = Router();
 
+// public routes
+router.post("/", listEvent);
 
 // private routes
 router.post("/create", userAuth, eventAuth, createEvent);
