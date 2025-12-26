@@ -61,7 +61,34 @@ const listEvent = asyncHandler(
   }
 )
 
+const getEventById = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    if (!id) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Event id is required", [], "");
+    }
+
+    const event = await Event.findById(id);
+    if (!event) {
+      throw new ApiError(StatusCodes.NOT_FOUND, "Event not found", [], "");
+    }
+
+    res
+      .status(StatusCodes.OK)
+      .json(
+        new ApiResponse(
+          StatusCodes.OK,
+          "Event fetched successfully",
+          { event }
+        )
+      )
+
+  }
+)
+
+
 export {
   createEvent,
   listEvent,
+  getEventById,
 }
