@@ -1,18 +1,20 @@
 import mongoose, { Schema } from "mongoose";
 
 type Category = "sport" | "business" | "tech" | "music" | "art" | "health" | "other";
+type ObjId = Schema.Types.ObjectId;
 
 interface IEvent {
-    title: string;
-    description?: string;
-    location: string;
-    date: Date;
-    price: number;
-    totalSeats: number;
-    availableSeats: number;
-    status: "active" | "cancelled";
-    category: Category;
-    image: string;
+  title: string;
+  description?: string;
+  location: string;
+  date: Date;
+  price: number;
+  totalSeats: number;
+  availableSeats: number;
+  status: "active" | "cancelled";
+  category: Category;
+  image: string;
+  organizer: ObjId;
   // startTime: string;
   // endTime: string;
 }
@@ -65,6 +67,10 @@ const eventSchema: Schema<IEvent> = new Schema(
       type: String,
       enum: ["active", "cancelled"],
       default: "active"
+    },
+    organizer: {
+      type: Schema.Types.ObjectId,
+      ref: "User"
     }
   },
   { timestamps: true }

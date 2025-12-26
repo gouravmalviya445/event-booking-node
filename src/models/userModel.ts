@@ -1,9 +1,12 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { ENV } from "../env";
 
+type ObjId = Schema.Types.ObjectId
+
 export interface IUser {
+  _id: ObjId;
   name: string;
   email: string;
   password: string;

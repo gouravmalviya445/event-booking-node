@@ -48,9 +48,6 @@ const createEvent = asyncHandler(
 const listEvent = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const events = await Event.find({ status: "active" });
-    if (events.length === 0) {
-      throw new ApiError(StatusCodes.NOT_FOUND, "No events found", [], "");
-    }
 
     res
       .status(StatusCodes.OK)
@@ -92,7 +89,9 @@ const getEventById = asyncHandler(
 const demoEvent = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      await seedDummyEvents();
+      const userId = req.user._id
+      await seedDummyEvents(String(userId));
+      
       res
         .status(StatusCodes.OK)
         .json(

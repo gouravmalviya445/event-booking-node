@@ -1,6 +1,7 @@
 import { Event } from "../models/eventModel";
+import { ApiError } from "../utils/ApiError";
 
-const events = [
+let events = [
   {
     title: "Tech Innovators Summit 2024",
     description: "Annual conference featuring tech leaders and groundbreaking innovations",
@@ -147,7 +148,11 @@ const events = [
   }
 ];
 
-async function seedDummyEvents() {
+async function seedDummyEvents(userId: string) {
+  if (userId === "" || userId === "undefined") {
+    throw new ApiError(400, "User id is required", [], "");
+  }
+  events = events.map((e) => ({...e, organizer: userId}))
   await Event.insertMany(events);
 }
  
