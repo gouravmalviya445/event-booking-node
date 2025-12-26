@@ -12,6 +12,7 @@ const apiLogHandler = (req: Request, res: Response, next: NextFunction) => {
           method: req.method,
           path: req.path,
           params: req.params,
+          queryParams: req.query,
           statusCode: res.statusCode,
           latency: Date.now() - startTime,
         }, "info")
@@ -59,6 +60,7 @@ const errorHandler = (
     statusCode: apiError.statusCode,
     message: apiError.message,
     params: req.params,
+    queryParams: req.query,
     errors: apiError.errors,
     stack: apiError.stack
   });
