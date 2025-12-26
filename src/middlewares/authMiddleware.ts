@@ -1,8 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { asyncHandler } from "../utils/asyncHandler";
 import { ApiError, StatusCodes } from "../utils/ApiError";
-import { ApiResponse } from "../utils/ApiResponse";
-import jwt, { decode } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { ENV } from "../env";
 import { IUser, User } from "../models/userModel";
 
@@ -43,6 +42,17 @@ const userAuth = asyncHandler(
   }
 )
 
+const eventAuth = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (req.user?.role !== "admin") {
+      throw new ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized", [], "");
+    } else {
+      next();
+    }
+  }
+)
+
 export {
-  userAuth
+  userAuth,
+  eventAuth
 }
