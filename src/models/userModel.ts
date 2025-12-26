@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { ENV } from "../env";
 
-interface IUser {
+export interface IUser {
   name: string;
   email: string;
   password: string;
