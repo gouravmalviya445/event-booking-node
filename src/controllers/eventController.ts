@@ -5,6 +5,7 @@ import { asyncHandler } from "../utils/asyncHandler";
 import { eventCreateSchema } from "../schema/eventValidation";
 import z from "zod";
 import { Event } from "../models/eventModel";
+import { seedDummyEvents } from "../db/seed";
 
 const createEvent = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -24,8 +25,10 @@ const createEvent = asyncHandler(
       location: data.location,
       date: data.date,
       price: data.price,
+      image: data.image,
       totalSeats: data.totalSeats,
       availableSeats: data.availableSeats,
+      category: data.category,
       status: data.status
     })
 
@@ -86,9 +89,29 @@ const getEventById = asyncHandler(
   }
 )
 
+const demoEvent = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      await seedDummyEvents();
+      res
+        .status(StatusCodes.OK)
+        .json(
+          new ApiResponse(
+            StatusCodes.OK,
+            "Dummy events seeded successfully",
+            {}
+          )
+        )
+    } catch (error) {
+      throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Error seeding dummy events", [], "");
+    }
+  }
+)
+
 
 export {
   createEvent,
   listEvent,
   getEventById,
+  demoEvent
 }

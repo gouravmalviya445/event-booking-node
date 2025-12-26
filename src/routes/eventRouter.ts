@@ -1,15 +1,16 @@
 import { Router } from "express";
 import { eventAuth, userAuth } from "../middlewares/authMiddleware";
-import { createEvent, getEventById, listEvent } from "../controllers/eventController";
+import { createEvent, getEventById, listEvent, demoEvent } from "../controllers/eventController";
 
 const router = Router();
 
 // public routes
 router.get("/:id", getEventById);
-router.post("/", listEvent);
+router.get("/", listEvent);
 
 // private routes
 router.post("/create", userAuth, eventAuth, createEvent);
+router.post("/dummy", userAuth, eventAuth, demoEvent)
 
 // TODO: add some more routes later
 // event delete/update
