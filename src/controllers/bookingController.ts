@@ -4,6 +4,8 @@ import { ApiResponse } from "../utils/ApiResponse";
 import { asyncHandler } from "../utils/asyncHandler";
 import z from "zod";
 import { bookingCreateSchema } from "../schema/bookingValidation";
+import { ENV } from "../env";
+import mongoose from "mongoose";
 
 // book an event
 const createBooking = asyncHandler(
@@ -18,7 +20,37 @@ const createBooking = asyncHandler(
         error.stack
       )
     }
+    
+    const response = await fetch(`${ENV.golangServerUrl}/api/bookings`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        "eventId": data.eventId,
+        "userId": req.user._id
+      })
+    })
 
-    // call go lang server
+    // parse the json response
+    const parseJson = await response.json();
+
+    if (parseJson.status === "ERROR") {
+      throw new ApiError(response.status, parseJson.error, [], "");
+    }
+
+    res
+      .status(StatusCodes.CREATED)
+      .json(
+        new ApiResponse(
+          StatusCodes.CREATED,
+          "Event booked successfully",
+          { booking: parseJson.data as Record<string, any> }
+        )
+      )
   }
 )
+
+export {
+  createBooking
+}

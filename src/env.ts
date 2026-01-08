@@ -13,6 +13,8 @@ const _env = {
 
   jwtSecret: String(process.env.JWT_SECRET),
   jwtExpiry: String(process.env.JWT_EXPIRY),
+
+  golangServerUrl: String(process.env.GOLANG_SERVER_URL),
 }
 
 export const ENV = Object.freeze(_env);
