@@ -10,7 +10,7 @@ export interface IUser {
   name: string;
   email: string;
   password: string;
-  role: "user" | "admin" | "organizer";
+  role: "attendee" | "admin" | "organizer";
 
   comparePassword(password: string): Promise<boolean>;
   createAccessToken(): string;
@@ -37,8 +37,8 @@ const userSchema: Schema<IUser> = new Schema<IUser>(
     },
     role: {
       type: String,
-      enum: ["user", "admin", "organizer"],
-      default: "user"
+      enum: ["attendee", "admin", "organizer"],
+      default: "attendee"
     }
   },
   { timestamps: true }

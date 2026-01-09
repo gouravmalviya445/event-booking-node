@@ -4,7 +4,7 @@ const userRegisterSchema = z.object({
   name: z.string(),
   email: z.email(),
   password: z.string().min(6),
-  role: z.enum(["user", "admin", "organizer"]).default("user")
+  role: z.enum(["attendee", "admin", "organizer"]).default("attendee")
 })
 
 const userLoginSchema = z.object({
