@@ -7,9 +7,9 @@ const app = express();
 
 // global middleware
 app.use(cors({
-  origin: ENV.corsOrigin
+  origin: ENV.corsOrigin,
+  credentials: true,
 }));
-app.use()
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser())
