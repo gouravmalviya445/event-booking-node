@@ -26,9 +26,10 @@ const registerUser = asyncHandler(async(req: Request, res: Response, next: NextF
     );
   }
 
+  // check if user already exists
   const existingUser = await User.findOne({ email: data.email });
   if (existingUser) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "User already exists", [], "");
+    throw new ApiError(StatusCodes.BAD_REQUEST, "User already exists with this email", [], "");
   }
 
   const newUser = await User.create({
@@ -39,7 +40,7 @@ const registerUser = asyncHandler(async(req: Request, res: Response, next: NextF
   });
 
   if (!newUser?._id) {
-    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Error creating user", [], "");
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Error registering user", [], "");
   }
 
   try {

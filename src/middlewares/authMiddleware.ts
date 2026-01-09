@@ -45,7 +45,7 @@ const userAuth = asyncHandler(
 const adminAuth = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     if (req.user?.role !== "admin") {
-      throw new ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized", [], "");
+      throw new ApiError(StatusCodes.FORBIDDEN, "Unauthorized! Only admins can access this route", [], "");
     } else {
       next();
     }
@@ -55,7 +55,7 @@ const adminAuth = asyncHandler(
 const organizerAuth = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     if (req.user?.role !== "organizer") {
-      throw new ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized", [], "");
+      throw new ApiError(StatusCodes.FORBIDDEN, "Unauthorized! Only organizers can access this route", [], "");
     } else {
       next();
     }

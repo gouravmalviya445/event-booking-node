@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { logger } from "../lib/logger";
 import { ApiError, StatusCodes } from "../utils/ApiError";
 
-
+// API Logger middleware
 const apiLogHandler = (req: Request, res: Response, next: NextFunction) => {
   const startTime = Date.now();
   res.on("finish", () => {
@@ -23,11 +23,12 @@ const apiLogHandler = (req: Request, res: Response, next: NextFunction) => {
   next();
 }
 
+// ERROR handler middleware
 const errorHandler = (
   err: ApiError | Error, 
   req: Request, 
   res: Response, 
-  next: NextFunction
+  _: NextFunction
 ) => {
   let error = err;
   

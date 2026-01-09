@@ -2,9 +2,14 @@ import express from "express";
 import { apiLogHandler } from "./middlewares/globalMiddleware";
 import { errorHandler } from "./middlewares/globalMiddleware";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 const app = express();
 
 // global middleware
+app.use(cors({
+  origin: ENV.corsOrigin
+}));
+app.use()
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser())
@@ -21,6 +26,7 @@ app.get("/api/health", (_, res) => {
 import userRouter from "./routes/userRouter";
 import eventRouter from "./routes/eventRouter"
 import bookingRouter from "./routes/bookingRouter";
+import { ENV } from "./env";
 
 app.use("/api/users", userRouter);
 app.use("/api/events", eventRouter);
