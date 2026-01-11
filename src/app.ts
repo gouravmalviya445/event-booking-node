@@ -3,6 +3,7 @@ import { apiLogHandler } from "./middlewares/globalMiddleware";
 import { errorHandler } from "./middlewares/globalMiddleware";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import { ENV } from "./env";
 const app = express();
 
 // global middleware
@@ -24,13 +25,14 @@ app.get("/api/health", (_, res) => {
 
 // routes
 import userRouter from "./routes/userRouter";
-import eventRouter from "./routes/eventRouter"
+import eventRouter from "./routes/eventRouter";
 import bookingRouter from "./routes/bookingRouter";
-import { ENV } from "./env";
+import authRouter from "./routes/authRouter";
 
 app.use("/api/users", userRouter);
 app.use("/api/events", eventRouter);
 app.use("/api/bookings", bookingRouter);
+app.use("/api/auth", authRouter);
 
 // global error handler
 app.use(errorHandler);
