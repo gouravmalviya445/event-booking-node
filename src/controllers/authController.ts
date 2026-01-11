@@ -6,6 +6,8 @@ import { ApiError, StatusCodes } from "../utils/ApiError";
 import { generateOTP } from "../utils/generateOtp";
 import { mailSender } from "../utils/mailer";
 import { Otp } from "../models/otpModel";
+import { emailBodySchema } from "../schema/authValidation";
+import bcrypt from "bcryptjs";
 
 const sendEmailOtp = asyncHandler(
   async (req: Request, res: Response, _: NextFunction) => {
@@ -19,7 +21,7 @@ const sendEmailOtp = asyncHandler(
         email,
         "Email Verification",
         `Your verification code is ${otp}. This Code is only valid for 5 minutes`,
-        `<h3>Your verification code is ${otp}. This Code is only valid for 5 minutes</h3>`
+        `<p>Your verification code is <b>${otp}</b>. This Code is only valid for 5 minutes</p>`
       )
       
       if (info.messageId) {
@@ -30,20 +32,27 @@ const sendEmailOtp = asyncHandler(
             identifier: email,
             purpose: "verify_email",
           })
+
+          // hash otp
+          const otpHash = await bcrypt.hash(otp, 10);
           
           // create new otp in the database
           await Otp.create({
             identifier: email,
-            otpHash: otp,
+            otpHash: otpHash,
             purpose: "verify_email",
             expiresAt: new Date(expiry),
           })
           res
             .status(StatusCodes.CREATED)
-            .json(new ApiResponse(StatusCodes.CREATED , "OTP sent successfully", {}))
+            .json(new ApiResponse(
+              StatusCodes.CREATED,
+              "An OTP has been sent to your email if it is exists",
+              {}
+            ))
           return;
         } catch (error) {
-          throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Error creating otp", [], "");
+          throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Error storing otp", [], "");
         }
       }
     } catch (error) {
@@ -88,7 +97,7 @@ const verifyEmailOtp = asyncHandler(
       throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Error increasing attempts", [], "");
     }
 
-    const isOTPValid = await otpRecord.compare(otp);
+    const isOTPValid = await bcrypt.compare(otp, otpRecord.otpHash);
     if (!isOTPValid) { 
       throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid OTP", [], "")
     }
@@ -118,7 +127,85 @@ const verifyEmailOtp = asyncHandler(
   }
 )
 
+const sendResetPasswordOtp = asyncHandler(
+  async (req: Request, res: Response, _: NextFunction) => {
+    const { success, data } = emailBodySchema.safeParse(req.body);
+    if (!success) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Please give a valid email", [], "");
+    }
+
+    const user = await User.findOne({ email: data.email });
+    if (!user) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "User with this email not exist", [], "");
+    }
+
+    try {
+      const otp = generateOTP(); // 6 dig otp
+
+      // send otp
+      const info = await mailSender(
+        data.email,
+        "Password Reset Verification",
+        `Your reset password verification code is ${otp}. This Code is only valid for 5 minutes`,
+        `<p>Your reset password verification code is <b>${otp}</b>. This Code is only valid for 5 minutes</p>`
+      )
+      
+      if (info.accepted[0] === data.email) {
+        try {
+          // first delete all the previous otp records
+          await Otp.deleteMany({
+            identifier: data.email,
+            purpose: "reset_pass",
+          })
+          
+          // hash otp
+          const otpHash = await bcrypt.hash(otp, 10);
+          
+          // create new one
+          await Otp.create({
+            identifier: data.email,
+            otpHash: otpHash,
+            purpose: "reset_pass",
+            expiresAt: new Date(Date.now() + (5 * 60 * 1000)) // 5 min
+          });
+          res
+            .status(StatusCodes.CREATED)
+            .json(new ApiResponse(
+              StatusCodes.CREATED,
+              "An OTP has been sent to your email if it is exists",
+              {}
+            ))
+        } catch(error) {
+          throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, (error as Error).message || "Error storing otp in db", [], "")
+        }
+      }
+    } catch (error) {
+      throw new ApiError(
+        StatusCodes.INTERNAL_SERVER_ERROR, 
+        "Error sending opt",
+        [], ""
+      )
+    }
+
+  }
+)
+
+const verifyResetPasswordOtp = asyncHandler(
+  async (req: Request, res: Response, _: NextFunction) => {
+    
+  }
+)
+
+const resetPassword = asyncHandler(
+  async (req: Request, res: Response, _: NextFunction) => {
+    
+  }
+)
+
 export {
   sendEmailOtp,
-  verifyEmailOtp
+  verifyEmailOtp,
+  sendResetPasswordOtp,
+  verifyResetPasswordOtp,
+  resetPassword
 }
