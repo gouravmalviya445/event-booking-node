@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 interface IOtp {
   identifier: string; // can be email or phone
   otpHash: string;
-  purpose: "RESET_PASSWORD" | "VERIFY_EMAIL";
+  purpose: "reset_pass" | "verify_email";
   attempts: number;
   maxAttempts: number;
   used: boolean;
@@ -28,7 +28,7 @@ const otpSchema: Schema<IOtp> = new Schema<IOtp>({
 
   purpose: {
     type: String,
-    enum: ["RESET_PASSWORD", "VERIFY_EMAIL"],
+    enum: ["reset_pass", "verify_email"],
     required: true,
   },
 
@@ -61,7 +61,7 @@ const otpSchema: Schema<IOtp> = new Schema<IOtp>({
 // automatically delete otp record if it is expired
 otpSchema.index(
   { expiresAt: 1 },
-  { expireAfterSeconds: (5 * 60), } // 1 hour
+  { expireAfterSeconds: 5 * 60, } // 1 hour
 );
 
 otpSchema.index({
