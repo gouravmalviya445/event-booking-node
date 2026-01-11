@@ -11,6 +11,7 @@ export interface IUser {
   email: string;
   password: string;
   role: "attendee" | "admin" | "organizer";
+  isEmailVerified: boolean;
 
   comparePassword(password: string): Promise<boolean>;
   createAccessToken(): string;
@@ -39,6 +40,10 @@ const userSchema: Schema<IUser> = new Schema<IUser>(
       type: String,
       enum: ["attendee", "admin", "organizer"],
       default: "attendee"
+    },
+    isEmailVerified: {
+      type: Boolean,
+      default: false
     }
   },
   { timestamps: true }
