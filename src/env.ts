@@ -15,6 +15,12 @@ const _env = {
   jwtExpiry: String(process.env.JWT_EXPIRY),
 
   golangServerUrl: String(process.env.GOLANG_SERVER_URL),
+
+  smtpHost: String(process.env.BREVO_SMTP_HOST),
+  smtpPort: String(process.env.BREVO_SMTP_PORT),
+  smtpUser: String(process.env.BREVO_SMTP_LOGIN),
+  smtpPass: String(process.env.BREVO_SMTP_API_KEY),
+  smtpSender: String(process.env.BREVO_SMTP_SENDER),
 }
 
 export const ENV = Object.freeze(_env);
