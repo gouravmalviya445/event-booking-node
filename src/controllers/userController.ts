@@ -50,7 +50,6 @@ const registerUser = asyncHandler(async(req: Request, res: Response, next: NextF
       "User created successfully",
       {
         user: newUser.toJSON(),
-        accessToken
       }
     )
     res
@@ -91,7 +90,6 @@ const loginUser = asyncHandler(
         "User logged in successfully",
         {
           user: user.toJSON(),
-          accessToken
         }
       )
       res
