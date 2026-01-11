@@ -6,8 +6,9 @@ import { ApiError, StatusCodes } from "../utils/ApiError";
 import { generateOTP } from "../utils/generateOtp";
 import { mailSender } from "../utils/mailer";
 import { Otp } from "../models/otpModel";
-import { emailBodySchema } from "../schema/authValidation";
+import { emailBodySchema, verifyPassSchema } from "../schema/authValidation";
 import bcrypt from "bcryptjs";
+import { treeifyError } from "zod";
 
 const sendEmailOtp = asyncHandler(
   async (req: Request, res: Response, _: NextFunction) => {
@@ -192,7 +193,66 @@ const sendResetPasswordOtp = asyncHandler(
 
 const verifyResetPasswordOtp = asyncHandler(
   async (req: Request, res: Response, _: NextFunction) => {
+    const { success, data, error } = verifyPassSchema.safeParse(req.body);
     
+    if (!success) {
+      const errors = treeifyError(error).errors
+      throw new ApiError(StatusCodes.BAD_REQUEST, errors[0], errors, "")
+    }
+
+    // find last send otp record based on createdAt field
+    const otpRecord = await Otp.findOne({
+      identifier: data.email,
+      purpose: "reset_pass",
+      expiresAt: { $gt: new Date() },
+    })
+
+    if (!otpRecord) {
+      throw new ApiError(StatusCodes.GONE, "OTP is expired , Generate a new one", [], "");
+    }
+
+    if (otpRecord.used === true) {
+      throw new ApiError(StatusCodes.GONE, "OTP is already used", [], "");
+    }
+
+    if (otpRecord.attempts >= otpRecord.maxAttempts) {
+      throw new ApiError(StatusCodes.GONE, "you have reached the maximum number of attempts", [], "");
+    }
+
+    // increase attempts
+    try {
+      await Otp.findByIdAndUpdate(otpRecord._id, { $inc: { attempts: 1 } });
+    } catch (error) {
+      throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Error increasing attempts", [], "");
+    }
+
+    const isOTPValid = await bcrypt.compare(data.otp, otpRecord.otpHash);
+    if (!isOTPValid) { 
+      throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid OTP", [], "")
+    }
+
+    try {
+      await Otp.findByIdAndUpdate(otpRecord._id, {
+        $set: { used: true } // set used to true, so it is only used once
+      })
+
+      await User.findOneAndUpdate(
+        { email: data.email },
+        { $set: { isEmailVerified: true } }
+      )
+
+      res
+      .status(StatusCodes.OK)
+      .json(new ApiResponse(StatusCodes.OK, "Email verified successfully for password reset", {}))
+      
+    } catch (error) {
+      throw new ApiError(
+        StatusCodes.INTERNAL_SERVER_ERROR,
+        (error as Error)?.message || "Error verifying email for password reset",
+        [],
+        ""
+      );      
+    }
   }
 )
 
