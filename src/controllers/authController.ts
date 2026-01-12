@@ -6,9 +6,11 @@ import { ApiError, StatusCodes } from "../utils/ApiError";
 import { generateOTP } from "../utils/generateOtp";
 import { mailSender } from "../utils/mailer";
 import { Otp } from "../models/otpModel";
-import { emailBodySchema, verifyPassSchema } from "../schema/authValidation";
+import { emailBodySchema, verifyPassSchema, resetPassSchema } from "../schema/authValidation";
 import bcrypt from "bcryptjs";
 import { treeifyError } from "zod";
+import { ResetToken } from "../models/resetTokenModel";
+import crypto from "crypto";
 
 const sendEmailOtp = asyncHandler(
   async (req: Request, res: Response, _: NextFunction) => {
@@ -24,7 +26,7 @@ const sendEmailOtp = asyncHandler(
         `Your verification code is ${otp}. This Code is only valid for 5 minutes`,
         `<p>Your verification code is <b>${otp}</b>. This Code is only valid for 5 minutes</p>`
       )
-      
+
       if (info.messageId) {
         const expiry = Date.now() + (5 * 60 * 1000);
         try {
@@ -98,7 +100,8 @@ const verifyEmailOtp = asyncHandler(
       throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Error increasing attempts", [], "");
     }
 
-    const isOTPValid = await bcrypt.compare(otp, otpRecord.otpHash);
+    // compare otp
+    const isOTPValid = await otpRecord.compare(otp);
     if (!isOTPValid) { 
       throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid OTP", [], "")
     }
@@ -151,7 +154,7 @@ const sendResetPasswordOtp = asyncHandler(
         `<p>Your reset password verification code is <b>${otp}</b>. This Code is only valid for 5 minutes</p>`
       )
       
-      if (info.accepted[0] === data.email) {
+      if (info.messageId) {
         try {
           // first delete all the previous otp records
           await Otp.deleteMany({
@@ -226,7 +229,8 @@ const verifyResetPasswordOtp = asyncHandler(
       throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Error increasing attempts", [], "");
     }
 
-    const isOTPValid = await bcrypt.compare(data.otp, otpRecord.otpHash);
+    // compare otp
+    const isOTPValid = await otpRecord.compare(data.otp);
     if (!isOTPValid) { 
       throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid OTP", [], "")
     }
@@ -236,14 +240,28 @@ const verifyResetPasswordOtp = asyncHandler(
         $set: { used: true } // set used to true, so it is only used once
       })
 
-      await User.findOneAndUpdate(
-        { email: data.email },
-        { $set: { isEmailVerified: true } }
-      )
+      const user = await User.findOne({ email: data.email }).select("_id");
+      if (!user) {
+        throw new ApiError(StatusCodes.NOT_FOUND, "User with this email not exist", [], "");
+      }
+
+      const tokenHash = crypto
+        .createHash("sha256")
+        .update(crypto.randomBytes(16).toString("hex"))
+        .digest("hex");
+      const resetToken = await ResetToken.create({
+        userId: user._id,
+        tokenHash: tokenHash,
+        expiresAt: new Date(Date.now() + (5 * 60 * 1000)),
+      })
 
       res
-      .status(StatusCodes.OK)
-      .json(new ApiResponse(StatusCodes.OK, "Email verified successfully for password reset", {}))
+        .status(StatusCodes.OK)
+        .json(new ApiResponse(
+          StatusCodes.OK,
+          "Email verified successfully for password reset",
+          { resetToken: resetToken.tokenHash }
+        ))
       
     } catch (error) {
       throw new ApiError(
@@ -258,7 +276,46 @@ const verifyResetPasswordOtp = asyncHandler(
 
 const resetPassword = asyncHandler(
   async (req: Request, res: Response, _: NextFunction) => {
+
+    const token = req.header("Authorization")?.replace("Bearer ", "");
+    if (!token) {
+      throw new ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized, reset token required", [], "");
+    }
     
+    const { success, data, error } = resetPassSchema.safeParse(req.body);
+    if (!success) {
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        "Password must contains more then 6 letters",
+        treeifyError(error).errors,
+        ""
+      )
+    }
+
+    const resetToken = await ResetToken.findOneAndUpdate(
+      {
+        tokenHash: token,
+        used: false,
+        expiresAt: { $gt: new Date() }
+      },
+      { $set: { used: true } },
+      { new: true } // return the updated document
+    );
+
+    if (!resetToken) {
+      throw new ApiError(StatusCodes.GONE, "Reset token is invalid, expired, or already used", [], "");
+    }
+
+    const user = await User.findByIdAndUpdate(resetToken.userId, {
+      $set: { password: data.newPassword }
+    });
+    if (!user) {
+      throw new ApiError(StatusCodes.NOT_FOUND, "User not found", [], "");
+    }
+
+    res
+      .status(StatusCodes.OK)
+      .json(new ApiResponse(StatusCodes.OK, "Password reset successfully", {}))
   }
 )
 
