@@ -10,6 +10,8 @@ interface IOtp {
   used: boolean;
   expiresAt: Date;
   createdAt: Date;
+
+  compare: (token: string) => Promise<boolean>
 }
 
 const otpSchema: Schema<IOtp> = new Schema<IOtp>({
@@ -66,5 +68,9 @@ otpSchema.index({
   identifier: 1, 
   createdAt: -1
 })
+
+otpSchema.methods.compare = async function (token: string) { 
+  return await bcrypt.compare(token, this.otpHash);
+}
 
 export const Otp = mongoose.model<IOtp>("Otp", otpSchema);
