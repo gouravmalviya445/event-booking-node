@@ -5,12 +5,12 @@ import { userAuth } from "../middlewares/authMiddleware"
 const router = Router();
 
 // email verification
-router.post("/email/send-otp", userAuth, sendEmailOtp);
-router.post("/email/verify-otp", userAuth, verifyEmailOtp);
+router.post("/email/send", userAuth, sendEmailOtp);
+router.post("/email/verify", userAuth, verifyEmailOtp);
 
 // reset password
-router.post("/password/send-otp", sendResetPasswordOtp);
-router.post("/password/verify-otp", verifyResetPasswordOtp)
+router.post("/password/send", sendResetPasswordOtp);
+router.post("/password/verify", verifyResetPasswordOtp)
 router.post("/password/reset", resetPassword)
 
 
