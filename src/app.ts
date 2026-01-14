@@ -4,6 +4,8 @@ import { errorHandler } from "./middlewares/globalMiddleware";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import { ENV } from "./env";
+import { apiRateLimiter } from "./middlewares/rateLimitMiddleware";
+
 const app = express();
 
 // global middleware
@@ -14,6 +16,9 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser())
+
+// api rate limiting a user only can make 100 req per 15 mint
+app.use(apiRateLimiter);
 
 // logger
 app.use(apiLogHandler);
