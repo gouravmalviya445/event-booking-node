@@ -306,12 +306,13 @@ const resetPassword = asyncHandler(
       throw new ApiError(StatusCodes.GONE, "Reset token is invalid, expired, or already used", [], "");
     }
 
-    const user = await User.findByIdAndUpdate(resetToken.userId, {
-      $set: { password: data.newPassword }
-    });
+    const user = await User.findById(resetToken.userId);
     if (!user) {
       throw new ApiError(StatusCodes.NOT_FOUND, "User not found", [], "");
     }
+
+    user.password = data.newPassword;
+    await user.save();
 
     res
       .status(StatusCodes.OK)
