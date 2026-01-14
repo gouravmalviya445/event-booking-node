@@ -80,7 +80,7 @@ const loginUser = asyncHandler(
 
     const isPasswordCorrect = await user.comparePassword(data.password);
     if (!isPasswordCorrect) {
-      throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid password", [], "");
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Invalid password", [], "");
     }
 
     try {
