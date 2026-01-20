@@ -33,11 +33,13 @@ import userRouter from "./routes/userRouter";
 import eventRouter from "./routes/eventRouter";
 import bookingRouter from "./routes/bookingRouter";
 import authRouter from "./routes/authRouter";
+import paymentRouter from "./routes/paymentRouter";
 
 app.use("/api/users", userRouter);
 app.use("/api/events", eventRouter);
 app.use("/api/bookings", bookingRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/payments", paymentRouter);
 
 // global error handler
 app.use(errorHandler);
