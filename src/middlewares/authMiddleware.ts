@@ -62,8 +62,19 @@ const organizerAuth = asyncHandler(
   }
 )
 
+const paymentAuth = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (req.user.isEmailVerified === false) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Please verify you email first", [], "");
+    } else {
+      next();
+    }
+  }
+)
+
 export {
   userAuth,
   adminAuth,
-  organizerAuth
+  organizerAuth,
+  paymentAuth
 }
