@@ -15,6 +15,7 @@ const _env = {
   jwtExpiry: String(process.env.JWT_EXPIRY),
 
   golangServerUrl: String(process.env.GOLANG_SERVER_URL),
+  clientUrl: String(process.env.CLIENT_URL),
 
   smtpHost: String(process.env.BREVO_SMTP_HOST),
   smtpPort: String(process.env.BREVO_SMTP_PORT),
