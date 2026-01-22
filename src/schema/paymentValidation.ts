@@ -4,6 +4,7 @@ const createPaymentOrderSchema = z.object({
   eventId: z.string(),
   amount: z.number(),
   currency: z.string().default("INR"),
+  totalTickets: z.number(),
 })
 
 const verifyPaymentSchema = z.object({

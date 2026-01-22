@@ -24,8 +24,9 @@ const createPaymentOrder = asyncHandler(
       const { data : { data: order } } = await apiClient.post("/bookings/order", {
         eventId: data.eventId,
         userId: req.user._id,
-        amount: data.amount,
-        currency: data.currency
+        amount: data.amount * 100, // in INR subunit
+        currency: data.currency,
+        totalTickets: data.totalTickets
       })
 
       res.status(StatusCodes.OK).json(
