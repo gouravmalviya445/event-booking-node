@@ -47,17 +47,50 @@ const createEvent = asyncHandler(
 
 const listEvent = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const events = await Event.find({ status: "active" });
+    const queryParam = String(req.query.search);
 
-    res
-      .status(StatusCodes.OK)
-      .json(
-        new ApiResponse(
-          StatusCodes.OK,
-          "Events fetched successfully",
-          { events }
+    const [search, order, category] = queryParam.split("|");
+
+    const query: Record<string, any> = {}
+    const sortOptions: Record<string, any> = {
+      "date-asc": { date: 1 },
+      "date-desc": { date: -1 },
+      "price-asc": { price: 1 },
+      "price-desc": { price: -1 },
+    };
+
+    if (search.trim() !== "") {
+      query.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+        { location: { $regex: search, $options: "i" } },
+      ]
+    }
+    
+    if (category.trim() !== "") {
+      query.category = category;
+    }
+
+    // 2. Select the sort order (default to 'date-asc' if 'order' is invalid or missing)
+    const sortBy = sortOptions[order] || { date: 1 };
+    
+    try {
+      const events = await Event.find(query)
+        .sort(sortBy)
+        .populate("organizer", "name");
+      res
+        .status(StatusCodes.OK)
+        .json(
+          new ApiResponse(
+            StatusCodes.OK,
+            "Events fetched successfully",
+            { events }
+          )
         )
-      )
+    } catch (error) {
+      throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Error fetching events", [], "");
+    }
+
   }
 )
 
