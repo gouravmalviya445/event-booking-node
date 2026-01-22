@@ -101,7 +101,7 @@ const getEventById = asyncHandler(
       throw new ApiError(StatusCodes.BAD_REQUEST, "Event id is required", [], "");
     }
 
-    const event = await Event.findById(id);
+    const event = await Event.findById(id).populate("organizer", "name");
     if (!event) {
       throw new ApiError(StatusCodes.NOT_FOUND, "Event not found", [], "");
     }
