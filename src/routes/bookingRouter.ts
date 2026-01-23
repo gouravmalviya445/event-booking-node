@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { createBooking } from "../controllers/bookingController"
 import { userAuth } from '../middlewares/authMiddleware';
+import { checkBookingStatus } from "../controllers/bookingController";
 
 const router = Router();
+router.get("/", userAuth, checkBookingStatus);
 
-router.post("/purchase", userAuth, createBooking)
 
 export default router;
