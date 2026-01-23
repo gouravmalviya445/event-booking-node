@@ -6,51 +6,41 @@ import z from "zod";
 import { bookingCreateSchema } from "../schema/bookingValidation";
 import { ENV } from "../env";
 import mongoose from "mongoose";
+import { apiClient } from "../utils/apiClient";
 
-// book an event
-const createBooking = asyncHandler(
+const checkBookingStatus = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    // call go lang server with event_id and user_id to book the event
-    const { success, error, data } = bookingCreateSchema.safeParse(req.body);
-    if (!success) {
-      throw new ApiError(
-        StatusCodes.BAD_REQUEST,
-        "Invalid inputs",
-        z.treeifyError(error).errors,
-        error.stack
-      )
-    }
-    
-    const response = await fetch(`${ENV.golangServerUrl}/api/bookings`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        "eventId": data.eventId,
-        "userId": req.user._id
-      })
-    })
+    const orderId = String(req.query.orderId);
 
-    // parse the json response
-    const parseJson = await response.json();
-
-    if (parseJson.status === "ERROR") {
-      throw new ApiError(response.status, parseJson.error, [], "");
+    if (!orderId.trim()) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Order id is required", [], "");
     }
 
-    res
-      .status(StatusCodes.CREATED)
-      .json(
-        new ApiResponse(
-          StatusCodes.CREATED,
-          "Event booked successfully",
-          { booking: parseJson.data as Record<string, any> }
+    try {
+      const { data: { data: booking } } = await apiClient.get(`/api/bookings?orderId=${orderId}`);
+
+      res
+        .status(StatusCodes.OK)
+        .json(
+          new ApiResponse(
+            StatusCodes.OK,
+            "Booking status fetched successfully",
+            booking
+          )
         )
-      )
+      
+    } catch (error: any) {
+      throw new ApiError(
+        StatusCodes.INTERNAL_SERVER_ERROR,
+        error?.response?.data?.error || "Error checking booking status",
+        [],
+        ""
+      );
+    }
+        
   }
 )
 
 export {
-  createBooking
+  checkBookingStatus
 }
