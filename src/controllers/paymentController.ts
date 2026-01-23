@@ -21,7 +21,7 @@ const createPaymentOrder = asyncHandler(
 
     try {
       // call go lang server to create order
-      const { data : { data: order } } = await apiClient.post("/bookings/order", {
+      const { data : { data: order } } = await apiClient.post("/api/bookings/order", {
         eventId: data.eventId,
         userId: req.user._id,
         amount: data.amount * 100, // in INR subunit
@@ -62,16 +62,14 @@ const verifyPaymentOrder = asyncHandler(
 
     try {
       // call go lang server to verify payment
-      const { data: { data: order} } = await apiClient.post("/bookings/verify", data);
+      const { data: { data: order} } = await apiClient.post("/api/bookings/verify", data);
       
-      res.redirect(`${ENV.clientUrl}/payment/${order.orderId}`)
+      res
+        .status(StatusCodes.OK)
+        .redirect(`${ENV.clientUrl}/payment?orderId=${order.orderId}`)
     } catch (error: any) {
-      throw new ApiError(
-        error?.response?.status || StatusCodes.INTERNAL_SERVER_ERROR,
-        error?.response?.data?.error || "Error verifying payment",
-        [],
-        error.stack
-      )
+      res
+        .redirect(`${ENV.clientUrl}/payment?orderId=${data.razorpay_order_id}`)
     }
   }
 )
