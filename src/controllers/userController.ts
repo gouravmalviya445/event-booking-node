@@ -7,6 +7,7 @@ import { ApiError, StatusCodes } from "../utils/ApiError";
 import { CookieOptions } from "express";
 import { ENV } from "../env";
 import z from "zod";
+import { apiClient } from "../utils/apiClient";
 
 const cookieOptions: CookieOptions = {
   httpOnly: true,
@@ -129,9 +130,44 @@ const getCurrentUser = asyncHandler(
   }
 )
 
+const getAttendeeDetails = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    // call golang service to get booking data for the user
+    try {
+      const { data: { data } } = await apiClient.get(`/api/bookings?userId=${req.user._id}`);
+
+      
+      const details = {
+        totalBookings: data?.totalBookings,
+        totalSpent: data?.totalSpent / 100, // normalize payment 
+        upcomingEvents: data?.upcomingEvents,
+        bookings: data?.bookings
+      }
+      
+      res
+        .status(StatusCodes.OK)
+        .json(
+          new ApiResponse(
+            StatusCodes.OK,
+            "attendee dashboard data fetched successfully",
+            details
+          )
+        )
+    } catch (error: any) {
+      throw new ApiError(
+        error?.response?.status || StatusCodes.INTERNAL_SERVER_ERROR,
+        error?.response?.data?.error || "Error fetching attendee dashboard data",
+        [],
+        ""
+      )
+    }
+  }
+)
+
 export {
   registerUser,
   loginUser,
   logoutUser,
-  getCurrentUser
+  getCurrentUser,
+  getAttendeeDetails
 }
