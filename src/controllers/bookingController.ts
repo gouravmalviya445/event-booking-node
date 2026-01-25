@@ -17,7 +17,7 @@ const checkBookingStatus = asyncHandler(
     }
 
     try {
-      const { data: { data: booking } } = await apiClient.get(`/api/bookings?orderId=${orderId}`);
+      const { data: { data: booking } } = await apiClient.get(`/api/bookings/${orderId}`);
 
       res
         .status(StatusCodes.OK)
