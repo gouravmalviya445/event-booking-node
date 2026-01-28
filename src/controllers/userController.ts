@@ -130,7 +130,7 @@ const getCurrentUser = asyncHandler(
   }
 )
 
-const getAttendeeDetails = asyncHandler(
+const getAttendee = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     // call golang service to get booking data for the user
     try {
@@ -164,10 +164,32 @@ const getAttendeeDetails = asyncHandler(
   }
 )
 
+const getOrganizer = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { data: { data } } = await apiClient.get(`/api/events?organizerId=${req.user._id}`);
+
+      res
+        .status(StatusCodes.OK)
+        .json(
+          new ApiResponse(StatusCodes.OK, "Organizer dashboard data fetched successfully", data)
+        )
+    } catch (error: any) {
+      throw new ApiError(
+        error?.response?.status || StatusCodes.INTERNAL_SERVER_ERROR,
+        error?.response?.data?.error || "Error fetching organizer dashboard data",
+        [],
+        ""
+      )
+    }
+  }
+)
+
 export {
   registerUser,
   loginUser,
   logoutUser,
   getCurrentUser,
-  getAttendeeDetails
+  getAttendee,
+  getOrganizer
 }
