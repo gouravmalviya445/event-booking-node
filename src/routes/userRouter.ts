@@ -5,9 +5,11 @@ import {
   logoutUser,
   getCurrentUser,
   getAttendee,
-  getOrganizer
+  getOrganizer,
+  getAllUsers,
+  deleteUser,
 } from "../controllers/userController";
-import { organizerAuth, userAuth } from "../middlewares/authMiddleware";
+import { adminAuth, organizerAuth, userAuth } from "../middlewares/authMiddleware";
 
 const router = Router();
 
@@ -18,5 +20,9 @@ router.post("/logout", userAuth, logoutUser);
 router.get("/current-user", userAuth, getCurrentUser);
 router.get("/attendee", userAuth, getAttendee);
 router.get("/organizer", userAuth, organizerAuth, getOrganizer);
+
+// admin routes
+router.get("/", userAuth, adminAuth, getAllUsers);
+router.delete("/:id", userAuth, adminAuth, deleteUser);
 
 export default router;

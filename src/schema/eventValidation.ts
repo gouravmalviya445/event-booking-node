@@ -8,7 +8,6 @@ const eventCreateSchema = z.object({
   price: z.number(),
   image: z.url().optional(),
   totalSeats: z.number(),
-  availableSeats: z.number(),
   status: z.enum(["active", "cancelled"]).default("active"),
   category: z.enum([
     "sport",

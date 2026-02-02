@@ -8,6 +8,7 @@ import { CookieOptions } from "express";
 import { ENV } from "../env";
 import z from "zod";
 import { apiClient } from "../utils/apiClient";
+import mongoose from "mongoose";
 
 const cookieOptions: CookieOptions = {
   httpOnly: true,
@@ -185,11 +186,61 @@ const getOrganizer = asyncHandler(
   }
 )
 
+// admin 
+const getAllUsers = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const users = await User.find({
+        _id: { $ne: req.user._id }
+      });
+
+      res
+        .status(StatusCodes.OK)
+        .json(
+          new ApiResponse(
+            StatusCodes.OK,
+            "Users fetched successfully",
+            {
+              users,
+              totalUsers: users?.length || 0,
+              totalVerifiedUsers:
+                users.reduce((total, user) => total + (user.isEmailVerified ? 1 : 0), 0),
+              totalAdmins:
+                users.reduce((total, user) => total + (user.role === "admin" ? 1 : 0), 0)
+            }
+          )
+        )
+    } catch (error) {
+      throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Error fetching users", [], "");
+    }
+  }
+)
+
+const deleteUser = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    if (!id || !id.trim()) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "User id is required", [], "");
+    }
+
+    try {
+      await User.findByIdAndDelete(id);
+      res
+        .status(StatusCodes.OK)
+        .json(new ApiResponse(StatusCodes.OK, "User deleted successfully", {}))
+    } catch (error) {
+      throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Error deleting user", [], "");
+    }
+  }
+)
+
 export {
   registerUser,
   loginUser,
   logoutUser,
   getCurrentUser,
   getAttendee,
-  getOrganizer
+  getOrganizer,
+  getAllUsers,
+  deleteUser
 }

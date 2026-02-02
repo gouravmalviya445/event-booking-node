@@ -27,7 +27,7 @@ const createEvent = asyncHandler(
       price: data.price,
       image: data.image,
       totalSeats: data.totalSeats,
-      availableSeats: data.availableSeats,
+      availableSeats: data.totalSeats,
       category: data.category,
       status: data.status
     })
