@@ -3,6 +3,7 @@ import { ApiError, StatusCodes } from "../utils/ApiError";
 import { ApiResponse } from "../utils/ApiResponse";
 import { asyncHandler } from "../utils/asyncHandler";
 import { apiClient } from "../utils/apiClient";
+import { mailSender } from "../utils/mailer";
 
 const checkBookingStatus = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -62,7 +63,33 @@ const getAllBookings = asyncHandler(
   }
 )
 
+const sendConfirmationEmail = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (req.user.isEmailVerified === false) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Please verify you email first", [], "");
+    }
+
+    const orderId = String(req.body.OrderId);
+    if (!orderId.trim()) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Order id is required", [], "");
+    }
+
+    try {
+      const info = await mailSender(req.user.email, "Booking Confirmation", "Your booking has been confirmed", `<p>Your booking has been confirmed successfully order id: ${orderId}</p>`);
+
+      if (info.messageId) {
+        res
+          .status(StatusCodes.OK)
+          .json(new ApiResponse(StatusCodes.OK, "Email sent successfully", {}))
+      }
+    } catch (error) {
+      throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Error sending email", [], "");     
+    }    
+  }
+)
+
 export {
   checkBookingStatus,
-  getAllBookings
+  getAllBookings,
+  sendConfirmationEmail
 }
