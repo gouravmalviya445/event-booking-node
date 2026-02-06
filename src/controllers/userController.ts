@@ -135,8 +135,7 @@ const getAttendee = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     // call golang service to get booking data for the user
     try {
-      const { data: { data } } = await apiClient.get(`/api/bookings?userId=${req.user._id}`);
-
+      const { data: { data } } = await apiClient.get(`/api/bookings/user/${req.user._id}`);
       
       const details = {
         totalBookings: data?.totalBookings,
@@ -206,7 +205,9 @@ const getAllUsers = asyncHandler(
               totalVerifiedUsers:
                 users.reduce((total, user) => total + (user.isEmailVerified ? 1 : 0), 0),
               totalAdmins:
-                users.reduce((total, user) => total + (user.role === "admin" ? 1 : 0), 0)
+                users.reduce((total, user) => total + (user.role === "admin" ? 1 : 0), 0),
+              totalOrganizers:
+                users.reduce((total, user) => total + (user.role === "organizer" ? 1 : 0), 0)
             }
           )
         )
