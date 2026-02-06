@@ -1,9 +1,10 @@
 import { Router } from "express";
-import { userAuth } from '../middlewares/authMiddleware';
-import { checkBookingStatus } from "../controllers/bookingController";
+import { adminAuth, userAuth } from '../middlewares/authMiddleware';
+import { checkBookingStatus, getAllBookings } from "../controllers/bookingController";
 
 const router = Router();
-router.get("/", userAuth, checkBookingStatus);
+router.get("/:orderId", userAuth, checkBookingStatus);
+router.get("/", userAuth, adminAuth, getAllBookings);
 
 
 export default router;
