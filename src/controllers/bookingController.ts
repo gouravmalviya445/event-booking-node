@@ -7,7 +7,7 @@ import { mailSender } from "../utils/mailer";
 
 const checkBookingStatus = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const orderId = req.params.OrderId;
+    const orderId = req.params.orderId;
 
     if (!orderId.trim()) {
       throw new ApiError(StatusCodes.BAD_REQUEST, "Order id is required", [], "");
@@ -63,6 +63,7 @@ const getAllBookings = asyncHandler(
   }
 )
 
+// booking confirmation
 const sendConfirmationEmail = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     if (req.user.isEmailVerified === false) {

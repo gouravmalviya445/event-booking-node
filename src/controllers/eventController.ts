@@ -29,6 +29,7 @@ const createEvent = asyncHandler(
       totalSeats: data.totalSeats,
       availableSeats: data.totalSeats,
       category: data.category,
+      organizer: req.user._id,
       status: data.status
     })
 
