@@ -243,7 +243,7 @@ const sendResetPasswordOtp = asyncHandler(
         StatusCodes.INTERNAL_SERVER_ERROR,
         "Error sending opt",
         [],
-        "",
+        (error as any).stack || "",
       );
     }
   },

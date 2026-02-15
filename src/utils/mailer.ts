@@ -1,31 +1,28 @@
-import nodemailer from "nodemailer";
+import { TransactionalEmailsApi, SendSmtpEmail } from "@getbrevo/brevo";
 import { ENV } from "../env";
 
-const transporter = nodemailer.createTransport({
-  host: ENV.smtpHost,
-  port: parseInt(ENV.smtpPort),
-  secure: false, // use false for port 587
-  auth: {
-    user: ENV.smtpUser,
-    pass: ENV.smtpPass
-  },
-  connectionTimeout: 10000, // 10 second
-})
+let emailAPI = new TransactionalEmailsApi();
+(emailAPI as any).authentications.apiKey.apiKey = ENV.brevoApiKey;
 
-async function mailSender(email: string, subject: string, text: string, html: string) {
+async function mailSender(
+  email: string,
+  subject: string,
+  text: string,
+  html: string,
+) {
   try {
-    return await transporter.sendMail({
-      from: `"Gatherly 👻" <${ENV.smtpSender}>`,
-      to: email,
-      subject: subject,
-      html: html,
-    })
-  } catch (error) {
-    console.log("Error sending email: ", error);
-    throw new Error("Error sending email");
-  }  
+    let message = new SendSmtpEmail();
+    message.subject = subject;
+    message.textContent = text;
+    message.htmlContent = html;
+    message.sender = { name: "Gatherly 👻", email: ENV.brevoSender };
+    message.to = [{ email: email }];
+  
+    return (await emailAPI.sendTransacEmail(message)).body;
+  } catch (error: any) {
+    console.log("Brevo email error:", error?.response?.data);
+    throw Error("Failed to send mail");
+  }
 }
 
-export {
-  mailSender
-}
+export { mailSender };

@@ -4,7 +4,7 @@ dotenv.config();
 
 const _env = {
   nodeEnv: String(process.env.NODE_ENV),
-  
+
   port: String(process.env.PORT),
   corsOrigin: String(process.env.CORS_ORIGIN),
 
@@ -17,11 +17,8 @@ const _env = {
   golangServerUrl: String(process.env.GOLANG_SERVER_URL),
   clientUrl: String(process.env.CLIENT_URL),
 
-  smtpHost: String(process.env.BREVO_SMTP_HOST),
-  smtpPort: String(process.env.BREVO_SMTP_PORT),
-  smtpUser: String(process.env.BREVO_SMTP_LOGIN),
-  smtpPass: String(process.env.BREVO_SMTP_API_KEY),
-  smtpSender: String(process.env.BREVO_SMTP_SENDER),
-}
+  brevoApiKey: String(process.env.BREVO_API_KEY),
+  brevoSender: String(process.env.BREVO_SENDER),
+};
 
 export const ENV = Object.freeze(_env);
