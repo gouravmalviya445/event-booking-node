@@ -239,7 +239,6 @@ const sendResetPasswordOtp = asyncHandler(
         }
       }
     } catch (error) {
-      logger.error("error sending pass reset OTP:" + error);
       throw new ApiError(
         StatusCodes.INTERNAL_SERVER_ERROR,
         "Error sending opt",
