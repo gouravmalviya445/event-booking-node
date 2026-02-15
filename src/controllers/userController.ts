@@ -8,12 +8,10 @@ import { CookieOptions } from "express";
 import { ENV } from "../env";
 import z from "zod";
 import { apiClient } from "../utils/apiClient";
-import mongoose from "mongoose";
 
 const cookieOptions: CookieOptions = {
   httpOnly: true,
   secure: ENV.nodeEnv === "production",
-  sameSite: "none",
   maxAge: 24 * 60 * 60 * 1000,
 };
 
