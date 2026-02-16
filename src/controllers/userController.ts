@@ -14,7 +14,7 @@ const cookieOptions: CookieOptions = {
   secure: ENV.nodeEnv === "production",
   maxAge: 24 * 60 * 60 * 1000,
   sameSite: "none",
-  domain: ".gourav.site",
+  domain: "gatherly.gourav.site",
 };
 
 const registerUser = asyncHandler(
@@ -128,15 +128,9 @@ const loginUser = asyncHandler(
 
 const logoutUser = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const clearCookieOptinos: CookieOptions = {
-      httpOnly: true,
-      secure: ENV.nodeEnv === "production",
-      sameSite: "none",
-      domain: ".gourav.site",
-    };
     res
       .status(StatusCodes.OK)
-      .clearCookie("accessToken", clearCookieOptinos)
+      .clearCookie("accessToken", cookieOptions)
       .json(
         new ApiResponse(StatusCodes.OK, "User logged out successfully", {}),
       );
