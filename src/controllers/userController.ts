@@ -132,11 +132,11 @@ const logoutUser = asyncHandler(
       httpOnly: true,
       secure: ENV.nodeEnv === "production",
       sameSite: "none",
-      domain: ".gourav.site", 
-    }
+      domain: ".gourav.site",
+    };
     res
       .status(StatusCodes.OK)
-      .clearCookie("accessToken", clearCookieOptinos);
+      .clearCookie("accessToken", clearCookieOptinos)
       .json(
         new ApiResponse(StatusCodes.OK, "User logged out successfully", {}),
       );
