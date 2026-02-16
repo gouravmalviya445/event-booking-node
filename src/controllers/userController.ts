@@ -128,9 +128,15 @@ const loginUser = asyncHandler(
 
 const logoutUser = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
+    const clearCookieOptinos: CookieOptions = {
+      httpOnly: true,
+      secure: ENV.nodeEnv === "production",
+      sameSite: "none",
+      domain: ".gourav.site", 
+    }
     res
       .status(StatusCodes.OK)
-      .clearCookie("accessToken", cookieOptions)
+      .clearCookie("accessToken", clearCookieOptinos);
       .json(
         new ApiResponse(StatusCodes.OK, "User logged out successfully", {}),
       );
