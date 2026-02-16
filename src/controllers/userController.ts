@@ -14,7 +14,7 @@ const cookieOptions: CookieOptions = {
   secure: ENV.nodeEnv === "production",
   maxAge: 24 * 60 * 60 * 1000,
   sameSite: "none",
-  domain: "gatherly.gourav.site",
+  domain: ".gourav.site",
 };
 
 const registerUser = asyncHandler(
@@ -251,7 +251,7 @@ const getAllUsers = asyncHandler(
 const deleteUser = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
-    if (!id || !id.trim()) {
+    if (!id) {
       throw new ApiError(
         StatusCodes.BAD_REQUEST,
         "User id is required",
