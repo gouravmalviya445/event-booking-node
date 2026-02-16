@@ -13,6 +13,7 @@ const cookieOptions: CookieOptions = {
   httpOnly: true,
   secure: ENV.nodeEnv === "production",
   maxAge: 24 * 60 * 60 * 1000,
+  sameSite: "strict",
 };
 
 const registerUser = asyncHandler(
@@ -137,13 +138,11 @@ const logoutUser = asyncHandler(
 
 const getCurrentUser = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    res
-      .status(StatusCodes.OK)
-      .json(
-        new ApiResponse(StatusCodes.OK, "User fetched successfully", {
-          user: req.user,
-        }),
-      );
+    res.status(StatusCodes.OK).json(
+      new ApiResponse(StatusCodes.OK, "User fetched successfully", {
+        user: req.user,
+      }),
+    );
   },
 );
 
@@ -286,4 +285,3 @@ export {
   getAllUsers,
   deleteUser,
 };
-
