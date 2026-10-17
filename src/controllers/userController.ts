@@ -13,8 +13,7 @@ const cookieOptions: CookieOptions = {
   httpOnly: true,
   secure: ENV.nodeEnv === "production",
   maxAge: 24 * 60 * 60 * 1000,
-  sameSite: "none",
-  domain: ".gourav.site",
+  sameSite: "lax",
 };
 
 const registerUser = asyncHandler(
