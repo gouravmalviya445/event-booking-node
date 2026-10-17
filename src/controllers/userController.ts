@@ -14,6 +14,7 @@ const cookieOptions: CookieOptions = {
   secure: ENV.nodeEnv === "production",
   maxAge: 24 * 60 * 60 * 1000,
   sameSite: "lax",
+  domain: ENV.nodeEnv === "production" ? ENV.domain : undefined,
 };
 
 const registerUser = asyncHandler(

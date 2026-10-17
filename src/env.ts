@@ -19,6 +19,8 @@ const _env = {
 
   brevoApiKey: String(process.env.BREVO_API_KEY),
   brevoSender: String(process.env.BREVO_SENDER),
+
+  domain: String(process.env.DOMAIN),
 };
 
 export const ENV = Object.freeze(_env);
